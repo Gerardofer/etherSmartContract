@@ -15,6 +15,8 @@ contract casino {
     
     mapping(address => Player) public playerInfo;
     
+    function () public payable {};
+    
     function casino (uint256 _minimumBet) public {
         owner = msg.sender;
         if(_minimumBet != 0 ) minimumBet = _minimumBet;
@@ -49,5 +51,27 @@ contract casino {
         uint256 numberGenerated = block.number % 10 + 1;
         
         distributePrizes(numberGenerated);
+    }
+    
+    function distributePrizes(uint256 numberWinner) public {
+        address[100] memory winners;
+        uint256 count = 0;
+        
+        for (uint256 i = 0; i < players.length; i++) {
+            address playerAddress = players[i];
+            if(playerInfo[playerAddress].numberSelected == numberWinner){
+                winners[count] = playerAddress;
+                count++;
+            }
+            delete playerInfo[playerAddress];
+        }
+        players.length = 0;
+        
+        uint256 winnerEtherAmount = totalBet / winners.lenght;
+        
+        for (uint256 j = 0; j < count; j++){
+            if (winners[j] != address(0))
+            winners[j].transfer(winnerEtherAmount);
+        }
     }
 }
